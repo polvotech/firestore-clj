@@ -573,14 +573,15 @@
 (defn map!
   "Updates all docs in a vector or query by applying a function to them"
   [q f & args]
-  (transact! (firestore q) (fn [tx]
-                             (let [drs      (if (instance? Query q)
-                                              (->> (query-snap q tx)
-                                                   (query-snap->doc-snaps)
-                                                   (mapv ref))
-                                              q)
-                                   all-data (pull-docs drs tx)]
-                               (mapv #(set tx %1 (apply f %2 args)) drs all-data)))))
+  (let [db (if (vector? q) (firestore (first q)) (firestore q))]
+    (transact! db (fn [tx]
+                    (let [drs (if (instance? Query q)
+                                (->> (query-snap q tx)
+                                     (query-snap->doc-snaps)
+                                     (mapv ref))
+                                q)
+                          all-data (pull-docs drs tx)]
+                      (mapv #(set tx %1 (apply f %2 args)) drs all-data))))))
 
 (declare limit)
 (declare offset)
