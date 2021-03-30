@@ -666,6 +666,16 @@
   ([^Query q ^String field value]
    (.whereEqualTo q field value)))
 
+(defn filter!=
+  "Filters where field != value. A map may be used for checking multiple equalities."
+  ([^Query q m]
+   (reduce (fn [q' [field value]]
+             (filter!= q' field value))
+           q
+           m))
+  ([^Query q ^String field value]
+   (.whereNotEqualTo q field value)))
+
 (defn filter<
   "Filters where field < value."
   [^Query q ^String field value]
